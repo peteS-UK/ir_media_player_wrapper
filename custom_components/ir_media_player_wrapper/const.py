@@ -1,0 +1,8 @@
+DOMAIN = "ir_media_player_wrapper"
+DEFAULT_NAME = "IR Media Player"
+CONF_REMOTE_ENTITY = "remote_entity"
+CONF_IR_DEVICE = "ir_device"
+CONF_MANUFACTURER = "manufacturer"
+CONF_MODEL = "Model"
+CONF_SOURCE_LIST = "source_list"
+CONF_FEATURES_LIST = "features_list"

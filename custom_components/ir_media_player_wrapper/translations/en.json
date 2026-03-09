@@ -1,0 +1,31 @@
+{
+  "title": "IR Media Player Wrapper",
+  "config": {
+    "error": {
+      "data": "Enter a name for your Media Player"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "name": "Name of the Media Player",
+          "remote_entity": "Select the Remote entity",
+          "source_list": "List of Sources",
+          "features_list": "List of supported features",
+          "ir_device": "IR device name",
+          "manufacturer": "Manufacturer",
+          "model": "Model"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "source_list": "List of Sources",
+          "features_list": "List of supported features"
+        }
+      }
+    }
+  }
+}
