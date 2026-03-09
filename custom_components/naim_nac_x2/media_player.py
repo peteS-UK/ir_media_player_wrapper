@@ -9,7 +9,7 @@ from homeassistant.components.media_player import (
     MediaPlayerEntityFeature,
     MediaPlayerState,
 )
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_MANUFACTURER, CONF_MODEL, CONF_NAME
 from homeassistant.helpers import (
     config_validation as cv,
     entity_platform,

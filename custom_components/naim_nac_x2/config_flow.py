@@ -25,13 +25,15 @@ from homeassistant.helpers.selector import (
 )
 
 from homeassistant import config_entries, core, exceptions
-from homeassistant.const import CONF_NAME
+from homeassistant.const import CONF_MANUFACTURER, CONF_MODEL, CONF_NAME
 import homeassistant.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema(
     {
+        vol.Required(CONF_MANUFACTURER): cv.string,
+        vol.Required(CONF_MODEL): cv.string,
         vol.Required(CONF_NAME): cv.string,
         vol.Required(CONF_REMOTE_TYPE): SelectSelector(
             SelectSelectorConfig(

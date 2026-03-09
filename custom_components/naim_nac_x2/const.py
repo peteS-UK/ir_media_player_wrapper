@@ -1,5 +1,5 @@
-DOMAIN = "naim_nac_x2"
-DEFAULT_NAME = "Naim NAC"
+DOMAIN = "ir_media_player_wrapper"
+DEFAULT_NAME = "IR Media Player"
 SERVICE_SEND_COMMAND = "send_command"
 CONF_REMOTE_ENTITY = "remote_entity"
 CONF_REMOTE_TYPE = "remote_type"
@@ -52,8 +52,8 @@ TUYA_COMMANDS = {
         "raw": "raw:886,886,1787,1787,1787,886,886,886,886,886,886,886,886,1787,1787,1787,886,886,886,886,886,62000,886,886,1787,1787,1787,886,886,886,886,886,886,886,886,1787,1787,1787,886,886,886,886,886",
     },
 }
-MANUFACTURER = "Naim"
-MODEL = "NAC"
+MANUFACTURER = "Manufacturer"
+MODEL = "Model"
 CONF_INPUT1 = "input1"
 CONF_INPUT2 = "input2"
 CONF_INPUT3 = "input3"
