@@ -9,35 +9,35 @@ from homeassistant.components.media_player import (
     MediaPlayerEntityFeature,
     MediaPlayerState,
 )
-from homeassistant.const import CONF_MANUFACTURER, CONF_MODEL, CONF_NAME
-from homeassistant.helpers import (
-    config_validation as cv,
-    entity_platform,
-)
+from homeassistant.const import CONF_NAME
+
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     DOMAIN,
-    SERVICE_SEND_COMMAND,
     CONF_REMOTE_ENTITY,
-    MANUFACTURER,
-    MODEL,
-    CONF_INPUT1,
-    CONF_INPUT2,
-    CONF_INPUT3,
-    CONF_INPUT4,
-    CONF_INPUT5,
-    CONF_INPUT6,
+    CONF_IR_DEVICE,
+    CONF_SOURCE_LIST,
+    CONF_MANUFACTURER,
+    CONF_MODEL,
+    CONF_FEATURES_LIST,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-SUPPORT = (
-    MediaPlayerEntityFeature.VOLUME_STEP
-    | MediaPlayerEntityFeature.VOLUME_MUTE
-    | MediaPlayerEntityFeature.SELECT_SOURCE
-)
+FEATURE_MAP = {
+    "Play": MediaPlayerEntityFeature.PLAY,
+    "Pause": MediaPlayerEntityFeature.PAUSE,
+    "Stop": MediaPlayerEntityFeature.STOP,
+    "Next": MediaPlayerEntityFeature.NEXT_TRACK,
+    "Previous": MediaPlayerEntityFeature.PREVIOUS_TRACK,
+    "Mute": MediaPlayerEntityFeature.VOLUME_MUTE,
+    "Volume Up/Volume Down": MediaPlayerEntityFeature.VOLUME_STEP,
+    "Turn On": MediaPlayerEntityFeature.TURN_ON,
+    "Turn Off": MediaPlayerEntityFeature.TURN_OFF,  
+    "Sources": MediaPlayerEntityFeature.SELECT_SOURCE,
+}
 
 
 async def async_setup_entry(
@@ -45,40 +45,21 @@ async def async_setup_entry(
     config_entry: config_entries.ConfigEntry,
     async_add_entities,
 ) -> None:
-    _source_map = {
-        "one": config_entry.data[CONF_INPUT1],
-        "two": config_entry.data[CONF_INPUT2],
-        "three": config_entry.data[CONF_INPUT3],
-        "four": config_entry.data[CONF_INPUT4],
-        "five": config_entry.data[CONF_INPUT5],
-        "six": config_entry.data[CONF_INPUT6],
-    }
     async_add_entities(
         [
             Device(
-                config_entry,
-                _source_map,
+                config_entry
             )
         ]
-    )
-
-    # Register entity services
-    platform = entity_platform.async_get_current_platform()
-    platform.async_register_entity_service(
-        SERVICE_SEND_COMMAND,
-        {
-            vol.Required("command"): cv.string,
-        },
-        Device.send_command.__name__,
     )
 
 
 class Device(MediaPlayerEntity):
     # Representation of a NAC
 
-    def __init__(self, config_entry, source_map):
+    def __init__(self, config_entry):
 
-        self._state = MediaPlayerState.IDLE
+        self._state = MediaPlayerState.IDLE if "Turn On" in config_entry.data.get(CONF_FEATURES_LIST, []) else MediaPlayerState.OFF
         self._entity_id = f"media_player.{DOMAIN}"
         self._name = config_entry.data[CONF_NAME]
         self._unique_id = f"{DOMAIN}_" + self._name.replace(" ", "_").replace(
@@ -88,19 +69,27 @@ class Device(MediaPlayerEntity):
         self._manufacturer = config_entry.data[CONF_MANUFACTURER]
         self._model = config_entry.data[CONF_MODEL]
         self._remote_entity = config_entry.data[CONF_REMOTE_ENTITY]
-        self._source_map = source_map
+        self._source_list  = config_entry.options.get( CONF_SOURCE_LIST, config_entry.data.get(CONF_SOURCE_LIST, []))
+        self._features_list = config_entry.data.get(CONF_FEATURES_LIST, [])
+        self._ir_device = config_entry.data[CONF_IR_DEVICE]
         self._source = None
-        self._sources = list(self._source_map.values())
+        self._muted = False
+
+        selected_features = config_entry.options.get(CONF_FEATURES_LIST,config_entry.data.get(CONF_FEATURES_LIST, []))
+        features = MediaPlayerEntityFeature(0)
+        for feature in selected_features:
+            if feature in FEATURE_MAP:
+                features |= FEATURE_MAP[feature]
+        self._attr_supported_features = features
 
     async def async_select_source(self, source: str) -> None:
         self._source = source
-        _cmd = [key for key, val in self._source_map.items() if val == source]
-        await self._send_remote_command(_cmd[0])
+        await self._send_remote_command(source)
         self.async_schedule_update_ha_state()
 
     @property
     def source_list(self):
-        return self._sources
+        return self._source_list
 
     @property
     def source(self):
@@ -116,7 +105,7 @@ class Device(MediaPlayerEntity):
 
     @property
     def state(self) -> MediaPlayerState:
-        return MediaPlayerState.ON
+        return self._state
 
     @property
     def name(self):
@@ -135,8 +124,8 @@ class Device(MediaPlayerEntity):
                 (DOMAIN, self._unique_id)
             },
             name=self._name,
-            manufacturer=MANUFACTURER,
-            model=MODEL,
+            manufacturer=self._manufacturer,
+            model=self._model,
         )
 
     @property
@@ -144,20 +133,8 @@ class Device(MediaPlayerEntity):
         return self._unique_id
 
     @property
-    def entity_id(self):
-        return self._entity_id
-
-    @property
     def device_class(self):
         return self._device_class
-
-    @entity_id.setter
-    def entity_id(self, entity_id):
-        self._entity_id = entity_id
-
-    @property
-    def supported_features(self) -> MediaPlayerEntityFeature:
-        return SUPPORT
 
     async def _send_remote_command(self, command):
 
@@ -167,6 +144,7 @@ class Device(MediaPlayerEntity):
                 "send_command",
                 {
                     "entity_id": self._remote_entity,
+                    "device": self._ir_device,
                     "num_repeats": "1",
                     "delay_secs": "0.4",
                     "command": command,
@@ -177,16 +155,57 @@ class Device(MediaPlayerEntity):
 
     @property
     def is_volume_muted(self):
-        return False
+        return self._muted
 
     async def async_mute_volume(self, mute: bool) -> None:
-        await self._send_remote_command("mute")
+        await self._send_remote_command("Mute")
+        self._muted = mute
+        self.async_schedule_update_ha_state()
 
     async def async_volume_up(self):
-        await self._send_remote_command("vol+")
+        await self._send_remote_command("Volume Up")
 
     async def async_volume_down(self):
-        await self._send_remote_command("vol-")
+        await self._send_remote_command("Volume Down")
 
     async def send_command(self, command):
         await self._send_remote_command(command)
+
+    async def async_media_stop(self) -> None:
+        """Send stop command to media player."""
+        await self._send_remote_command("Stop")
+        self._state = MediaPlayerState.IDLE
+        self.async_schedule_update_ha_state()
+
+    async def async_media_play(self) -> None:
+        """Send play command to media player."""
+        await self._send_remote_command("Play")
+        self._state = MediaPlayerState.PLAYING
+        self.async_schedule_update_ha_state()
+
+    async def async_media_pause(self) -> None:
+        """Send pause command to media player."""
+        await self._send_remote_command("Pause")
+        self._state = MediaPlayerState.PAUSED
+        self.async_schedule_update_ha_state()
+
+    async def async_media_next_track(self) -> None:
+        """Send next track command."""
+        await self._send_remote_command("Next")
+
+    async def async_media_previous_track(self) -> None:
+        """Send next track command."""
+        await self._send_remote_command("Previous")
+
+    async def async_media_turn_on(self) -> None:
+        """Send turn on command."""
+        await self._send_remote_command("Turn On")
+        self._state = MediaPlayerState.PLAYING
+        self.async_schedule_update_ha_state()
+
+    async def async_media_turn_off(self) -> None:
+        """Send turn off command."""
+        await self._send_remote_command("Turn Off")
+        self._state = MediaPlayerState.OFF
+        self.async_schedule_update_ha_state()
+
