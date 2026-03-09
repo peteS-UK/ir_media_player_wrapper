@@ -1,0 +1,25 @@
+send_command:
+  name: Send Command
+  description: Send command to Naim NAC
+  target:
+    entity:
+      integration: naim_nac_x2
+      domain: media_player
+  fields:
+    command:
+      name: Command
+      description: 'The Command to send to the device.'
+      required: true
+      selector:
+        select:
+          multiple: false
+          options:
+            - mute
+            - volume_up
+            - volume_down
+            - one
+            - two
+            - three
+            - four
+            - five
+            - six

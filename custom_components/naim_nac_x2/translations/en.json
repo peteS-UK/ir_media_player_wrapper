@@ -1,0 +1,24 @@
+{
+  "title": "Naim NAC",
+  "config": {
+    "error": {
+      "data": "Enter a name for your NAC Pre-amp",
+      "select": "You must either discover or enter details manually"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "name": "Name of the Naim NAC Pre-amp",
+          "remote_entity": "Select the Remote entity",
+          "remote_type": "What type of IR blaster",
+          "input1": "Input 1",
+          "input2": "Input 2",
+          "input3": "Input 3",
+          "input4": "Input 4",
+          "input5": "Input 5",
+          "input6": "Input 6"
+        }
+      }
+    }
+  }
+}
