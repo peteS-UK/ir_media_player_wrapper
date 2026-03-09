@@ -104,8 +104,8 @@ async def validate_auth(hass: core.HomeAssistant, data: dict) -> None:
         # Manual entry requires host and name and model
         raise ValueError
 
-
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+@config_entries.HANDLERS.register(DOMAIN)
+class ConfigFlow(config_entries.ConfigFlow):
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
 
     async def async_step_user(self, user_input=None):
