@@ -13,7 +13,7 @@ from .const import (
     CONF_INPUT4,
     CONF_INPUT5,
     CONF_INPUT6,
-    CONF_REMOTE_TYPE,
+    CONF_IR_DEVICE,
 )
 
 from homeassistant.helpers.selector import (
@@ -35,57 +35,10 @@ CONFIG_SCHEMA = vol.Schema(
         vol.Required(CONF_MANUFACTURER): cv.string,
         vol.Required(CONF_MODEL): cv.string,
         vol.Required(CONF_NAME): cv.string,
-        vol.Required(CONF_REMOTE_TYPE): SelectSelector(
-            SelectSelectorConfig(
-                mode=SelectSelectorMode.DROPDOWN,
-                options=["Broadlink", "Tuya RC5", "Tuya Raw"],
-            )
-        ),
         vol.Required(CONF_REMOTE_ENTITY): EntitySelector(
             EntitySelectorConfig(filter={"domain": "remote"})
         ),
-        vol.Required(CONF_INPUT1, default="Phono"): SelectSelector(
-            SelectSelectorConfig(
-                multiple=False,
-                options=["Phono", "CD", "Tuner", "Tape", "VCR", "AUX"],
-                mode=SelectSelectorMode.DROPDOWN,
-            )
-        ),
-        vol.Required(CONF_INPUT2, default="CD"): SelectSelector(
-            SelectSelectorConfig(
-                multiple=False,
-                options=["Phono", "CD", "Tuner", "Tape", "VCR", "AUX"],
-                mode=SelectSelectorMode.DROPDOWN,
-            )
-        ),
-        vol.Required(CONF_INPUT3, default="Tuner"): SelectSelector(
-            SelectSelectorConfig(
-                multiple=False,
-                options=["Phono", "CD", "Tuner", "Tape", "VCR", "AUX"],
-                mode=SelectSelectorMode.DROPDOWN,
-            )
-        ),
-        vol.Required(CONF_INPUT4, default="Tape"): SelectSelector(
-            SelectSelectorConfig(
-                multiple=False,
-                options=["Phono", "CD", "Tuner", "Tape", "VCR", "AUX"],
-                mode=SelectSelectorMode.DROPDOWN,
-            )
-        ),
-        vol.Required(CONF_INPUT5, default="VCR"): SelectSelector(
-            SelectSelectorConfig(
-                multiple=False,
-                options=["Phono", "CD", "Tuner", "Tape", "VCR", "AUX"],
-                mode=SelectSelectorMode.DROPDOWN,
-            )
-        ),
-        vol.Required(CONF_INPUT6, default="AUX"): SelectSelector(
-            SelectSelectorConfig(
-                multiple=False,
-                options=["Phono", "CD", "Tuner", "Tape", "VCR", "AUX"],
-                mode=SelectSelectorMode.DROPDOWN,
-            )
-        ),
+        vol.Required(CONF_IR_DEVICE): cv.string,
     }
 )
 
@@ -104,6 +57,7 @@ async def validate_auth(hass: core.HomeAssistant, data: dict) -> None:
         # Manual entry requires host and name and model
         raise ValueError
 
+
 @config_entries.HANDLERS.register(DOMAIN)
 class ConfigFlow(config_entries.ConfigFlow):
     CONNECTION_CLASS = config_entries.CONN_CLASS_LOCAL_PUSH
@@ -120,7 +74,9 @@ class ConfigFlow(config_entries.ConfigFlow):
             if not errors:
                 # Input is valid, set data.
                 self.data = user_input
-                return self.async_create_entry(title="Naim NAC", data=self.data)
+                return self.async_create_entry(
+                    title=self.data[CONF_NAME], data=self.data
+                )
 
         # If there is no user input or there were errors, show the form again, including any errors that were found with the input.
         return self.async_show_form(

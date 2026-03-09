@@ -15,12 +15,12 @@ from homeassistant.helpers import (
     entity_platform,
 )
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
     DOMAIN,
     SERVICE_SEND_COMMAND,
     CONF_REMOTE_ENTITY,
-    BROADLINK_COMMANDS,
     MANUFACTURER,
     MODEL,
     CONF_INPUT1,
@@ -29,8 +29,6 @@ from .const import (
     CONF_INPUT4,
     CONF_INPUT5,
     CONF_INPUT6,
-    CONF_REMOTE_TYPE,
-    TUYA_COMMANDS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,10 +56,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             Device(
-                hass,
-                config_entry.data[CONF_NAME],
-                config_entry.data[CONF_REMOTE_ENTITY],
-                config_entry.data[CONF_REMOTE_TYPE],
+                config_entry,
                 _source_map,
             )
         ]
@@ -81,17 +76,18 @@ async def async_setup_entry(
 class Device(MediaPlayerEntity):
     # Representation of a NAC
 
-    def __init__(self, hass, name, remote_entity, remote_type, source_map):
-        self._hass = hass
+    def __init__(self, config_entry, source_map):
+
         self._state = MediaPlayerState.IDLE
         self._entity_id = f"media_player.{DOMAIN}"
-        self._unique_id = f"{DOMAIN}_" + name.replace(" ", "_").replace(
+        self._name = config_entry.data[CONF_NAME]
+        self._unique_id = f"{DOMAIN}_" + self._name.replace(" ", "_").replace(
             "-", "_"
         ).replace(":", "_")
         self._device_class = "receiver"
-        self._name = name
-        self._remote_entity = remote_entity
-        self._remote_type = remote_type
+        self._manufacturer = config_entry.data[CONF_MANUFACTURER]
+        self._model = config_entry.data[CONF_MODEL]
+        self._remote_entity = config_entry.data[CONF_REMOTE_ENTITY]
         self._source_map = source_map
         self._source = None
         self._sources = list(self._source_map.values())
@@ -164,30 +160,8 @@ class Device(MediaPlayerEntity):
         return SUPPORT
 
     async def _send_remote_command(self, command):
-        if self._remote_type == "Tuya RC5":
-            await self.hass.services.async_call(
-                "remote",
-                "send_command",
-                {
-                    "entity_id": self._remote_entity,
-                    "num_repeats": "1",
-                    "delay_secs": "0.4",
-                    "command": f"{TUYA_COMMANDS[command]['rc5']}",
-                },
-            )
-        if self._remote_type == "Tuya Raw":
-            await self.hass.services.async_call(
-                "remote",
-                "send_command",
-                {
-                    "entity_id": self._remote_entity,
-                    "num_repeats": "1",
-                    "delay_secs": "0.4",
-                    "command": f"{TUYA_COMMANDS[command]['raw']}",
-                },
-            )
 
-        if self._remote_type == "Broadlink":
+        try:
             await self.hass.services.async_call(
                 "remote",
                 "send_command",
@@ -195,9 +169,11 @@ class Device(MediaPlayerEntity):
                     "entity_id": self._remote_entity,
                     "num_repeats": "1",
                     "delay_secs": "0.4",
-                    "command": f"b64:{BROADLINK_COMMANDS[command]}",
+                    "command": command,
                 },
             )
+        except Exception as e:
+            raise HomeAssistantError(f"Failed to send command {command}: {e}")
 
     @property
     def is_volume_muted(self):

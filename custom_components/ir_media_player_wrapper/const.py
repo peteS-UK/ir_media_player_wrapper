@@ -2,7 +2,7 @@ DOMAIN = "ir_media_player_wrapper"
 DEFAULT_NAME = "IR Media Player"
 SERVICE_SEND_COMMAND = "send_command"
 CONF_REMOTE_ENTITY = "remote_entity"
-CONF_REMOTE_TYPE = "remote_type"
+CONF_IR_DEVICE = "ir_device"
 BROADLINK_COMMANDS = {
     "vol+": "JgA0ABsfHB8bIDkeHB8cHxweHjo6HhwfHB8bAAujGx8cHxsfOR8cHxsfHB8cPDkfGyAcHh0ADQUAAAAA",
     "vol-": "JgA0AB4fHh0eHTsdHR4eHR0eHjo3Ih0eHjocAAt2GyAdHh4cPB0dHh4dHh0eOjsdHxwfOhsADQUAAAAA",
