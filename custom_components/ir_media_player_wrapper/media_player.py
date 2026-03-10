@@ -79,9 +79,9 @@ class Device(MediaPlayerEntity):
     def __init__(self, config_entry):
 
         self._state = (
-            MediaPlayerState.IDLE
+            MediaPlayerState.OFF
             if "Turn On" in config_entry.data.get(CONF_FEATURES_LIST, [])
-            else MediaPlayerState.OFF
+            else MediaPlayerState.ON
         )
         self._entity_id = f"media_player.{DOMAIN}"
         self._name = config_entry.data[CONF_NAME]
