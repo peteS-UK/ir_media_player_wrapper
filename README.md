@@ -19,3 +19,7 @@ The integration depends on you having captured the IR codes for your device usin
 ## Options
 
 You can update your list of sources and your selected featured by re-configuring the config option by clicking on the cog in the integration list.
+
+## Actions
+
+The integration includes an action ir_media_player_wrapper.set_state, which allows you to override the current internal state of the media player. This can be necessary since the integration doesn't actually know the state of the player, so tries to maintain an internal version of state, which might become unaligned to the actual state.

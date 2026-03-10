@@ -1,0 +1,22 @@
+set_state:
+  name: Set State
+  description: Set the state on the media player.
+  target:
+    entity:
+      integration: ir_media_player_wrapper
+      domain: media_player
+  fields:
+    state:
+      name: State
+      description: 'The desired state of the media player, overriding the current state.'
+      required: true
+      selector:
+        select:
+          multiple: false
+          options:
+            - 'Off'
+            - 'On'
+            - 'Idle'
+            - 'Playing'
+            - 'Paused'
+            - 'Buffering'
