@@ -78,11 +78,6 @@ class Device(MediaPlayerEntity):
 
     def __init__(self, config_entry):
 
-        self._state = (
-            MediaPlayerState.IDLE
-            if "Turn On" in config_entry.data.get(CONF_FEATURES_LIST, [])
-            else MediaPlayerState.OFF
-        )
         self._entity_id = f"media_player.{DOMAIN}"
         self._name = config_entry.data[CONF_NAME]
         self._unique_id = f"{DOMAIN}_" + self._name.replace(" ", "_").replace(
@@ -95,16 +90,20 @@ class Device(MediaPlayerEntity):
         self._source_list = config_entry.options.get(
             CONF_SOURCE_LIST, config_entry.data.get(CONF_SOURCE_LIST, [])
         )
-        self._features_list = config_entry.data.get(CONF_FEATURES_LIST, [])
+        self._selected_features = config_entry.options.get(
+            CONF_FEATURES_LIST, config_entry.data.get(CONF_FEATURES_LIST, [])
+        )
+        self._state = (
+            MediaPlayerState.OFF
+            if "Turn On" in self._selected_features
+            else MediaPlayerState.ON
+        )
         self._ir_device = config_entry.data[CONF_IR_DEVICE]
         self._source = None
         self._muted = False
 
-        selected_features = config_entry.options.get(
-            CONF_FEATURES_LIST, config_entry.data.get(CONF_FEATURES_LIST, [])
-        )
         features = MediaPlayerEntityFeature(0)
-        for feature in selected_features:
+        for feature in self._selected_features:
             if feature in FEATURE_MAP:
                 features |= FEATURE_MAP[feature]
         self._attr_supported_features = features
