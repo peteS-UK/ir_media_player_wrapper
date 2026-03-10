@@ -34,7 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 
 STATE_MAP = {
     "Off": MediaPlayerState.OFF,
-    "On": MediaPlayerState.PLAYING,
+    "On": MediaPlayerState.ON,
     "Idle": MediaPlayerState.IDLE,
     "Playing": MediaPlayerState.PLAYING,
     "Paused": MediaPlayerState.PAUSED,
