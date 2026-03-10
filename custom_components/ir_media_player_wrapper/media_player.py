@@ -128,7 +128,10 @@ class Device(MediaPlayerEntity):
 
     @property
     def icon(self):
-        return "mdi:audio-video"
+        if self._state == MediaPlayerState.OFF:
+            return "mdi:audio-video-off"
+        else:
+            return "mdi:audio-video"
 
     @property
     def state(self) -> MediaPlayerState:
