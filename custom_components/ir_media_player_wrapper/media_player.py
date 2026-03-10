@@ -233,13 +233,13 @@ class Device(MediaPlayerEntity):
         """Send next track command."""
         await self._send_remote_command("Previous")
 
-    async def async_media_turn_on(self) -> None:
+    async def async_turn_on(self) -> None:
         """Send turn on command."""
         await self._send_remote_command("Turn On")
-        self._state = MediaPlayerState.PLAYING
+        self._state = MediaPlayerState.ON
         self.async_schedule_update_ha_state()
 
-    async def async_media_turn_off(self) -> None:
+    async def async_turn_off(self) -> None:
         """Send turn off command."""
         await self._send_remote_command("Turn Off")
         self._state = MediaPlayerState.OFF

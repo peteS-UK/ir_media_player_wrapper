@@ -14,7 +14,7 @@ Once downloaded either via HACS or manually, restart your Home Assistant server,
 
 ## Configuration
 
-The integration depends on you having captured the IR codes for your device using the remote.learn_command action. Here you need to specify a device name, which you use in the configuration of this component, and the names of each command. These names need to match the names of the features you select in the configuration e.g. Play, Pause, Turn On, Turn Off, etc.. For the Volume Up/Volume Down feature, you need to create two commands - Volume Up and Volume Down. The names are case sensitive.
+The integration depends on you having captured the IR codes for your device using the remote.learn_command action. Here you need to specify a device name, which you use in the configuration of this component, and the names of each command. These names need to match the names of the features you select in the configuration e.g. Play, Pause, Turn On, Turn Off, etc.. For the Volume Up/Volume Down feature, you need to create two commands - Volume Up and Volume Down. The names are case sensitive - you must learn the commands as Play, Pause not play, pause etc..
 
 ## Options
 
