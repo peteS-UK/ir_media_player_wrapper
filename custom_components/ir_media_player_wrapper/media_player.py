@@ -27,6 +27,7 @@ from .const import (
     CONF_REMOTE_ENTITY,
     CONF_SOURCE_LIST,
     DOMAIN,
+    SERVICE_SET_MUTE,
     SERVICE_SET_STATE,
 )
 
@@ -70,6 +71,14 @@ async def async_setup_entry(
             vol.Required("state"): cv.string,
         },
         Device.set_state.__name__,
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_MUTE,
+        {
+            vol.Required("mute"): cv.boolean,
+        },
+        Device.set_mute.__name__,
     )
 
 
@@ -187,6 +196,11 @@ class Device(MediaPlayerEntity):
             raise HomeAssistantError(f"Invalid state: {state}")
         self._state = STATE_MAP[state]
         self.async_schedule_update_ha_state()
+
+    async def set_mute(self, mute):
+        if "Mute" in self._selected_features:
+            self._muted = mute
+            self.async_schedule_update_ha_state()
 
     @property
     def is_volume_muted(self):

@@ -8,7 +8,7 @@ set_state:
   fields:
     state:
       name: State
-      description: 'The desired state of the media player, overriding the current state.'
+      description: 'The desired state of the media player entity, overriding the current state.'
       required: true
       selector:
         select:
@@ -20,3 +20,17 @@ set_state:
             - 'Playing'
             - 'Paused'
             - 'Buffering'
+set_mute:
+  name: Set Mute
+  description: Set the mute state on the media player.
+  target:
+    entity:
+      integration: ir_media_player_wrapper
+      domain: media_player
+  fields:
+    mute:
+      name: Mute
+      description: 'The desired mute state of the media player entity, overriding the current state.'
+      required: true
+      selector:
+        boolean:
